@@ -1,0 +1,116 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block head_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+{% endblock %}
+{% block content%}
+<div class="container-fluid">
+  <!-- Page Heading -->
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Endereços</h1>
+    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+        class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Lista de Endereços</h6>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table id="example" class="display nowrap table table-striped table-sm" style="width:100%">
+              <thead>
+                <tr>
+                  <th>CEP</th>
+                  <th>Logradouro</th>
+                  <th>Complemento</th>
+                  <th>Bairro</th>
+                  <th>Localidade</th>
+                  <th>UF</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for address in addresses %}
+                <tr>
+                  <td>{{ address.cep }}</td>
+                  <td>{{ address.logradouro }}</td>
+                  <td>{{ address.complemento }}</td>
+                  <td>{{ address.bairro }}</td>
+                  <td>{{ address.localidade }}</td>
+                  <td>{{ address.uf }}</td>
+                  <td>
+                    <!-- Ações permitidas -->
+                    <a href="{% url 'address_detail' address.id %}" class="btn btn-info btn-sm text-white"
+                      title="Visualizar">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                    {% if request.user.is_superuser or address.user == request.user %}
+                    <a href="{% url 'address_edit' address.id %}" class="btn btn-primary btn-sm" title="Editar">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    {% if request.user.is_superuser %}
+                    <a href="{% url 'address_delete' address.id %}" class="btn btn-danger btn-sm" title="Deletar">
+                      <i class="fas fa-trash-alt"></i>
+                    </a>
+                    {% endif %}
+                    {% endif %}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td valign="top" colspan="7" class="dataTables_empty">Nenhum endereço encontrado.</td>
+                </tr>
+                {% endfor %}
+
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>CEP</th>
+                  <th>Logradouro</th>
+                  <th>Complemento</th>
+                  <th>Bairro</th>
+                  <th>Localidade</th>
+                  <th>UF</th>
+                  <th>Ações</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+{% endblock %}
+{% block javascript %}
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script>
+  $(document).ready(function () {
+    var table = $('#example').DataTable({
+      responsive: true,
+      dom: 'Bfrtip',
+      buttons: [
+        'colvis'
+      ],
+      language: {
+        url: '//cdn.datatables.net/plug-ins/1.10.19/i18n/Portuguese-Brasil.json'
+      },
+      deferRender: true,
+      emptyTable: "Nenhum dado disponível na tabela",
+    });
+
+    if (!table.data().any()) {
+      $('#example tbody').empty();
+      $('#example tfoot').hide();
+    }
+  });
+</script>
+
+{% endblock %}
